@@ -95,6 +95,29 @@ body.no-scroll {
   transform: translateY(0);
 }
 
+/* ===== CLEAR SEARCH BUTTON ===== */
+.clear-search-button {
+  padding: 0.75rem 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-search-button:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+.clear-search-button.hidden {
+  display: none;
+}
+
 /* ===== MAIN CONTAINER ===== */
 .main-container {
   max-width: 1440px;
@@ -135,6 +158,44 @@ body.no-scroll {
 .pokemon-card:hover {
   transform: translateY(-10px) scale(1.02);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== FAVORITE HEART ON CARDS ===== */
+.card-favorite-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-favorite-button:hover {
+  transform: scale(1.15);
+  background: white;
+}
+
+.card-favorite-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ff6b6b;
+  stroke-width: 2;
+  fill: none;
+  transition: fill 0.3s ease;
+}
+
+.card-favorite-button.favorited svg {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
 }
 
 .pokemon-id {
@@ -262,6 +323,23 @@ body.no-scroll {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* ===== NO RESULTS MESSAGE ===== */
+.no-results-message {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.no-results-message h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.no-results-message p {
+  opacity: 0.8;
 }
 
 /* ===== LOAD MORE BUTTON ===== */
@@ -395,6 +473,16 @@ body.no-scroll {
 .favorite-button:hover {
   background: rgba(255, 255, 255, 0.5);
   transform: scale(1.1);
+}
+
+/* Favorite button in overlay */
+.favorite-button svg {
+  transition: fill 0.3s ease;
+}
+
+.favorite-button.favorited svg {
+  fill: white;
+  stroke: white;
 }
 
 .detail-pokemon-image-container {
@@ -713,45 +801,7 @@ body.no-scroll {
 
 /* ===== NAVIGATION ARROWS ===== */
 .nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: white;
-  border: none;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  z-index: 10;
-  color: #333;
-}
-
-.nav-arrow-left {
-  left: -60px;
-}
-
-.nav-arrow-right {
-  right: -60px;
-}
-
-.nav-arrow:hover {
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.nav-arrow:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* ===== NAVIGATION ARROWS ===== */
-.nav-arrow {
-  position: fixed; /* Changed from absolute to fixed */
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
   background: white;
@@ -765,16 +815,16 @@ body.no-scroll {
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
-  z-index: 1002; /* Higher than overlay */
+  z-index: 1002;
   color: #333;
 }
 
 .nav-arrow-left {
-  left: 20px; /* Changed from -60px */
+  left: 20px;
 }
 
 .nav-arrow-right {
-  right: 20px; /* Changed from -60px */
+  right: 20px;
 }
 
 .nav-arrow:hover:not(:disabled) {
@@ -787,71 +837,6 @@ body.no-scroll {
 .nav-arrow:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-
-/* Favorite button states */
-.favorite-button.favorited {
-  background: rgba(255, 0, 0, 0.8) !important;
-}
-
-.favorite-button.favorited svg {
-  fill: white;
-}
-
-/* ===== FAVORITE HEART ON CARDS ===== */
-.pokemon-card {
-  position: relative;
-}
-
-.card-favorite-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.card-favorite-button:hover {
-  transform: scale(1.15);
-  background: white;
-}
-
-.card-favorite-button svg {
-  width: 20px;
-  height: 20px;
-  stroke: #ff6b6b;
-  stroke-width: 2;
-  fill: none;
-  transition: fill 0.3s ease;
-}
-
-.card-favorite-button.favorited svg {
-  fill: #ff6b6b;
-  stroke: #ff6b6b;
-}
-
-/* Favorite button in overlay */
-.favorite-button svg {
-  transition: fill 0.3s ease;
-}
-
-.favorite-button.favorited svg {
-  fill: white;
-  stroke: white;
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS FOR ARROWS ===== */
-@media (max-width: 768px) {
 }
 
 /* ===== RESPONSIVE DESIGN (Mobile First) ===== */
@@ -916,6 +901,7 @@ body.no-scroll {
   .nav-arrow:hover:not(:disabled) {
     transform: scale(1.1);
   }
+
   .info-grid {
     grid-template-columns: 1fr;
   }
