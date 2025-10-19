@@ -9,17 +9,12 @@
       type="image/png"
       href="assets/favicon-96x96.png"
       sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-    <link rel="shortcut icon" href="assets/favicon.ico" />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
       href="assets/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="Pokédex" />
-    <link rel="manifest" href="assets/site.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-
   <body onload="init()">
     <!-- Header Section -->
     <header class="header">
@@ -65,20 +60,25 @@
     <div id="pokemonOverlay" class="overlay hidden">
       <div class="overlay-background" id="overlayBackground"></div>
       <div class="pokemon-detail-card" id="pokemonDetailCard">
+        <!-- Close Button (X) -->
+        <button class="close-button" id="closeButton" aria-label="Close">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
         <!-- Header with gradient background -->
         <div class="detail-header" id="detailHeader">
-          <button class="back-button" id="closeButton">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button class="favorite-button" id="favoriteButton">
+          <button
+            class="favorite-button"
+            id="favoriteButton"
+            aria-label="Add to favorites">
             <svg
               width="24"
               height="24"
@@ -115,7 +115,7 @@
         </div>
 
         <!-- Tab Content -->
-        <div class="tab-content-container">
+        <div class="tab-content-container" id="tabContentContainer">
           <!-- About Tab -->
           <div class="tab-content active" id="about-tab">
             <div class="info-grid">
@@ -188,7 +188,10 @@
         </div>
 
         <!-- Navigation Arrows -->
-        <button class="nav-arrow nav-arrow-left" id="prevButton">
+        <button
+          class="nav-arrow nav-arrow-left"
+          id="prevButton"
+          aria-label="Previous Pokemon">
           <svg
             width="24"
             height="24"
@@ -199,7 +202,10 @@
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <button class="nav-arrow nav-arrow-right" id="nextButton">
+        <button
+          class="nav-arrow nav-arrow-right"
+          id="nextButton"
+          aria-label="Next Pokemon">
           <svg
             width="24"
             height="24"
@@ -215,6 +221,7 @@
 
     <!-- JavaScript Modules (in order) -->
     <script src="scripts/config.js"></script>
+    <script src="scripts/templates.js"></script>
     <script src="scripts/helpers.js"></script>
     <script src="scripts/storage.js"></script>
     <script src="scripts/api.js"></script>

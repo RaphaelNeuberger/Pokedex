@@ -9,6 +9,14 @@ function openPokemonDetail(index) {
 }
 
 function displayPokemonDetail(pokemon) {
+  applyTypeColors(pokemon);
+  updateDetailHeader(pokemon);
+  fillAllTabs(pokemon);
+  updateAllFavoriteButtons(pokemon.id);
+  attachFavoriteListener(pokemon.id);
+}
+
+function applyTypeColors(pokemon) {
   const typeColor = getTypeColor(pokemon.types[0].type.name);
   const typeColorLight = lightenColor(typeColor, 20);
 
@@ -20,7 +28,9 @@ function displayPokemonDetail(pokemon) {
 
   const detailHeader = document.querySelector(".detail-header");
   detailHeader.style.background = `linear-gradient(180deg, ${typeColor} 0%, ${typeColorLight} 100%)`;
+}
 
+function updateDetailHeader(pokemon) {
   document.getElementById("detailPokemonImage").src =
     pokemon.sprites.other["official-artwork"].front_default;
   document.getElementById("detailPokemonImage").alt = pokemon.name;
@@ -28,13 +38,11 @@ function displayPokemonDetail(pokemon) {
   document.getElementById("detailPokemonId").textContent = `#${formatPokemonId(
     pokemon.id
   )}`;
-  document.getElementById("detailPokemonTypes").innerHTML = getTypeBadgesHTML(
-    pokemon.types
-  );
+  document.getElementById("detailPokemonTypes").innerHTML =
+    getTypeBadgesTemplate(pokemon.types);
+}
 
-  updateAllFavoriteButtons(pokemon.id);
-  attachFavoriteListener(pokemon.id);
-
+function fillAllTabs(pokemon) {
   fillAboutTab(pokemon);
   fillStatsTab(pokemon);
   fillEvolutionTab(pokemon);
@@ -88,9 +96,7 @@ function closeOverlay() {
 function initializeTabs() {
   const tabButtons = document.querySelectorAll(".tab-button");
   tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      switchTab(button.dataset.tab);
-    });
+    button.addEventListener("click", () => switchTab(button.dataset.tab));
   });
 }
 
@@ -123,6 +129,7 @@ function fillAboutTab(pokemon) {
 
   const abilities = pokemon.abilities.map((a) => a.ability.name).join(", ");
   document.getElementById("abilities").textContent = abilities;
+
   document.getElementById("eggGroups").textContent = "Monster, Grass";
   document.getElementById("eggCycle").textContent = "Grass";
 }
@@ -132,27 +139,13 @@ function fillStatsTab(pokemon) {
   const maxStat = 255;
 
   statsContainer.innerHTML = pokemon.stats
-    .map((stat) => {
-      const percentage = (stat.base_stat / maxStat) * 100;
-      const statColor = getStatColor(stat.base_stat);
-
-      return `
-        <div class="stat-row">
-          <span class="stat-name">${formatStatName(stat.stat.name)}</span>
-          <span class="stat-value">${stat.base_stat}</span>
-          <div class="stat-bar-container">
-            <div class="stat-bar" style="width: ${percentage}%; background: ${statColor};"></div>
-          </div>
-        </div>
-      `;
-    })
+    .map((stat) => getStatRowTemplate(stat, maxStat))
     .join("");
 
   document.getElementById("defensesPokemonName").textContent = pokemon.name;
-  const typeEffectivenessGrid = document.getElementById(
-    "typeEffectivenessGrid"
-  );
-  typeEffectivenessGrid.innerHTML = generateTypeEffectiveness(pokemon.types);
+
+  const grid = document.getElementById("typeEffectivenessGrid");
+  grid.innerHTML = generateTypeEffectiveness();
 }
 
 function fillEvolutionTab(pokemon) {
@@ -165,22 +158,11 @@ function fillMovesTab(pokemon) {
   const movesList = document.getElementById("movesList");
   const moves = pokemon.moves.slice(0, 10);
 
-  movesList.innerHTML = moves
-    .map((move) => {
-      return `
-        <div class="move-item">
-          <span class="move-name">${move.move.name}</span>
-          <span class="move-type" style="background: ${getTypeColor(
-            "normal"
-          )}">Normal</span>
-        </div>
-      `;
-    })
-    .join("");
+  movesList.innerHTML = moves.map((move) => getMoveItemTemplate(move)).join("");
 }
 
-function generateTypeEffectiveness(types) {
-  const allTypes = [
+function generateTypeEffectiveness() {
+  const types = [
     "normal",
     "fire",
     "water",
@@ -191,15 +173,5 @@ function generateTypeEffectiveness(types) {
     "poison",
   ];
 
-  return allTypes
-    .map((type) => {
-      const multiplier = "1×";
-      return `
-        <div class="effectiveness-item">
-          <div class="effectiveness-icon type-${type}">${type[0].toUpperCase()}</div>
-          <span class="effectiveness-multiplier">${multiplier}</span>
-        </div>
-      `;
-    })
-    .join("");
+  return types.map((type) => getTypeEffectivenessTemplate(type)).join("");
 }

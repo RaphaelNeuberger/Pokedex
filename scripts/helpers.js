@@ -45,6 +45,7 @@ function lightenColor(color, percent) {
   const R = (num >> 16) + amt;
   const G = ((num >> 8) & 0x00ff) + amt;
   const B = (num & 0x0000ff) + amt;
+
   return (
     "#" +
     (

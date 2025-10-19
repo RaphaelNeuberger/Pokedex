@@ -39,11 +39,7 @@ async function performSearch(searchTerm) {
   clearSearchButton.classList.remove("hidden");
 
   try {
-    const localResults = allPokemonData.filter((pokemon) => {
-      const nameMatch = pokemon.name.toLowerCase().includes(searchTerm);
-      const idMatch = pokemon.id.toString().includes(searchTerm);
-      return nameMatch || idMatch;
-    });
+    const localResults = filterLocalPokemon(searchTerm);
 
     if (localResults.length > 0) {
       displayFilteredResults(localResults);
@@ -52,17 +48,28 @@ async function performSearch(searchTerm) {
     }
 
     const apiResults = await searchCompleteDatabase(searchTerm);
-
-    if (apiResults.length > 0) {
-      displayFilteredResults(apiResults);
-    } else {
-      showNoResultsMessage();
-    }
+    displaySearchResults(apiResults);
   } catch (error) {
     console.error("Search error:", error);
     showNoResultsMessage();
   } finally {
     showLoading(false);
+  }
+}
+
+function filterLocalPokemon(searchTerm) {
+  return allPokemonData.filter((pokemon) => {
+    const nameMatch = pokemon.name.toLowerCase().includes(searchTerm);
+    const idMatch = pokemon.id.toString().includes(searchTerm);
+    return nameMatch || idMatch;
+  });
+}
+
+function displaySearchResults(results) {
+  if (results.length > 0) {
+    displayFilteredResults(results);
+  } else {
+    showNoResultsMessage();
   }
 }
 
@@ -81,12 +88,7 @@ function displayFilteredResults(filteredPokemon) {
 }
 
 function showNoResultsMessage() {
-  pokemonContainer.innerHTML = `
-    <div class="no-results-message">
-      <h2>😔 No Pokémon found</h2>
-      <p>Try searching for another name or ID</p>
-    </div>
-  `;
+  pokemonContainer.innerHTML = getNoResultsTemplate();
   loadMoreButton.style.display = "none";
 }
 

@@ -29,23 +29,28 @@ function isFavorite(pokemonId) {
 }
 
 function updateAllFavoriteButtons(pokemonId) {
-  const overlayFavoriteBtn = document.getElementById("favoriteButton");
-  if (overlayFavoriteBtn) {
-    if (isFavorite(pokemonId)) {
-      overlayFavoriteBtn.classList.add("favorited");
-    } else {
-      overlayFavoriteBtn.classList.remove("favorited");
-    }
-  }
+  updateOverlayFavoriteButton(pokemonId);
+  updateCardFavoriteButton(pokemonId);
+}
 
-  const cardFavoriteBtn = document.querySelector(
-    `[data-pokemon-id="${pokemonId}"]`
-  );
-  if (cardFavoriteBtn) {
-    if (isFavorite(pokemonId)) {
-      cardFavoriteBtn.classList.add("favorited");
-    } else {
-      cardFavoriteBtn.classList.remove("favorited");
-    }
+function updateOverlayFavoriteButton(pokemonId) {
+  const btn = document.getElementById("favoriteButton");
+  if (!btn) return;
+
+  if (isFavorite(pokemonId)) {
+    btn.classList.add("favorited");
+  } else {
+    btn.classList.remove("favorited");
+  }
+}
+
+function updateCardFavoriteButton(pokemonId) {
+  const btn = document.querySelector(`[data-pokemon-id="${pokemonId}"]`);
+  if (!btn) return;
+
+  if (isFavorite(pokemonId)) {
+    btn.classList.add("favorited");
+  } else {
+    btn.classList.remove("favorited");
   }
 }

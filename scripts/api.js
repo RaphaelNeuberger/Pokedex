@@ -14,7 +14,7 @@ async function loadPokemon() {
     const response = await fetch(url);
     const data = await response.json();
 
-    await renderPokemonList(data.results);
+    await fetchAllPokemonData(data.results);
     currentOffset += LIMIT;
   } catch (error) {
     console.error("Error loading Pokemon:", error);
@@ -25,45 +25,22 @@ async function loadPokemon() {
   }
 }
 
-function loadMorePokemon() {
-  if (!isSearching) {
-    loadPokemon();
-  }
-}
+async function fetchAllPokemonData(pokemonList) {
+  const promises = pokemonList.map((pokemon) =>
+    fetchPokemonDetails(pokemon.url)
+  );
+  const pokemonDataArray = await Promise.all(promises);
 
-async function renderPokemonList(pokemonList) {
-  for (const pokemon of pokemonList) {
-    const pokemonData = await fetchPokemonDetails(pokemon.url);
+  pokemonDataArray.forEach((pokemonData) => {
     allLoadedPokemon.push(pokemonData);
     allPokemonData.push(pokemonData);
     renderPokemonCard(pokemonData);
-  }
+  });
 }
 
-async function searchCompleteDatabase(searchTerm) {
-  try {
-    const directResult = await searchByNameOrId(searchTerm);
-    if (directResult) {
-      return [directResult];
-    }
-
-    const allPokemonUrl = `${POKEMON_API_BASE}?limit=${TOTAL_POKEMON}`;
-    const response = await fetch(allPokemonUrl);
-    const data = await response.json();
-
-    const matchingPokemon = data.results.filter((pokemon) =>
-      pokemon.name.toLowerCase().includes(searchTerm)
-    );
-
-    const limitedMatches = matchingPokemon.slice(0, 20);
-    const pokemonDetails = await Promise.all(
-      limitedMatches.map((pokemon) => fetchPokemonDetails(pokemon.url))
-    );
-
-    return pokemonDetails;
-  } catch (error) {
-    console.error("Database search error:", error);
-    return [];
+function loadMorePokemon() {
+  if (!isSearching) {
+    loadPokemon();
   }
 }
 
@@ -77,4 +54,31 @@ async function searchByNameOrId(searchTerm) {
   } catch (error) {
     return null;
   }
+}
+
+async function searchCompleteDatabase(searchTerm) {
+  try {
+    const directResult = await searchByNameOrId(searchTerm);
+    if (directResult) return [directResult];
+
+    return await searchAllPokemon(searchTerm);
+  } catch (error) {
+    console.error("Database search error:", error);
+    return [];
+  }
+}
+
+async function searchAllPokemon(searchTerm) {
+  const allPokemonUrl = `${POKEMON_API_BASE}?limit=${TOTAL_POKEMON}`;
+  const response = await fetch(allPokemonUrl);
+  const data = await response.json();
+
+  const matches = data.results.filter((p) =>
+    p.name.toLowerCase().includes(searchTerm)
+  );
+
+  const limitedMatches = matches.slice(0, 20);
+  const promises = limitedMatches.map((p) => fetchPokemonDetails(p.url));
+
+  return await Promise.all(promises);
 }
