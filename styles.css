@@ -800,25 +800,6 @@ body.no-scroll {
 
 /* ===== RESPONSIVE ADJUSTMENTS FOR ARROWS ===== */
 @media (max-width: 768px) {
-  .nav-arrow {
-    width: 40px;
-    height: 40px;
-    bottom: 20px;
-    top: auto;
-    transform: none;
-  }
-
-  .nav-arrow-left {
-    left: 10px;
-  }
-
-  .nav-arrow-right {
-    right: 10px;
-  }
-
-  .nav-arrow:hover:not(:disabled) {
-    transform: scale(1.1);
-  }
 }
 
 /* ===== RESPONSIVE DESIGN (Mobile First) ===== */
@@ -864,11 +845,25 @@ body.no-scroll {
     border-radius: 0;
   }
 
-  .nav-arrow-left,
-  .nav-arrow-right {
-    display: none;
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    bottom: 20px;
+    top: auto;
+    transform: none;
   }
 
+  .nav-arrow-left {
+    left: 10px;
+  }
+
+  .nav-arrow-right {
+    right: 10px;
+  }
+
+  .nav-arrow:hover:not(:disabled) {
+    transform: scale(1.1);
+  }
   .info-grid {
     grid-template-columns: 1fr;
   }
