@@ -18,6 +18,3 @@ function attachEventListeners() {
   prevButton.addEventListener("click", showPreviousPokemon);
   nextButton.addEventListener("click", showNextPokemon);
 }
-
-// ===== START APPLICATION =====
-init();

@@ -359,6 +359,7 @@ body.no-scroll {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  justify-content: center !important;
 }
 
 .load-more-button:hover:not(:disabled) {
