@@ -58,20 +58,33 @@ function toggleFavorite(pokemonId) {
   }
 
   saveFavoritesToStorage();
-  updateFavoriteButton(pokemonId);
+  updateAllFavoriteButtons(pokemonId);
 }
 
 function isFavorite(pokemonId) {
   return favoritePokemon.includes(pokemonId);
 }
 
-function updateFavoriteButton(pokemonId) {
-  const favoriteBtn = document.getElementById("favoriteButton");
-  if (favoriteBtn) {
+function updateAllFavoriteButtons(pokemonId) {
+  // Update overlay favorite button
+  const overlayFavoriteBtn = document.getElementById("favoriteButton");
+  if (overlayFavoriteBtn) {
     if (isFavorite(pokemonId)) {
-      favoriteBtn.classList.add("favorited");
+      overlayFavoriteBtn.classList.add("favorited");
     } else {
-      favoriteBtn.classList.remove("favorited");
+      overlayFavoriteBtn.classList.remove("favorited");
+    }
+  }
+
+  // Update card favorite button in grid
+  const cardFavoriteBtn = document.querySelector(
+    `[data-pokemon-id="${pokemonId}"]`
+  );
+  if (cardFavoriteBtn) {
+    if (isFavorite(pokemonId)) {
+      cardFavoriteBtn.classList.add("favorited");
+    } else {
+      cardFavoriteBtn.classList.remove("favorited");
     }
   }
 }
@@ -125,27 +138,37 @@ function createPokemonCardElement(pokemon) {
   card.className = "pokemon-card";
   card.style.backgroundColor = getTypeColor(pokemon.types[0].type.name);
   card.innerHTML = getPokemonCardHTML(pokemon);
-  card.addEventListener("click", () => openPokemonDetail(pokemon.id - 1));
+
+  // Add click listener to card (not the favorite button)
+  card.addEventListener("click", (e) => {
+    // Don't open detail if clicking on favorite button
+    if (!e.target.closest(".card-favorite-button")) {
+      openPokemonDetail(pokemon.id - 1);
+    }
+  });
+
+  // Add favorite button listener
+  const favBtn = card.querySelector(".card-favorite-button");
+  favBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleFavorite(pokemon.id);
+  });
+
   return card;
 }
 
 function getPokemonCardHTML(pokemon) {
-  const heartIcon = isFavorite(pokemon.id) ? "❤️" : "🤍";
+  const isFav = isFavorite(pokemon.id);
 
   return `
+    <button class="card-favorite-button ${isFav ? "favorited" : ""}" 
+            data-pokemon-id="${pokemon.id}"
+            aria-label="Add to favorites">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </button>
     <div class="pokemon-id">#${formatPokemonId(pokemon.id)}</div>
-    <button class="favorite-button" id="favoriteButton">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2">
-              <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
     <img src="${pokemon.sprites.other["official-artwork"].front_default}" 
          alt="${pokemon.name}" 
          class="pokemon-image">
@@ -200,7 +223,7 @@ function displayPokemonDetail(pokemon) {
     pokemon.types
   );
 
-  updateFavoriteButton(pokemon.id);
+  updateAllFavoriteButtons(pokemon.id);
   attachFavoriteListener(pokemon.id);
 
   fillAboutTab(pokemon);
@@ -212,9 +235,11 @@ function displayPokemonDetail(pokemon) {
 function attachFavoriteListener(pokemonId) {
   const favoriteBtn = document.getElementById("favoriteButton");
 
+  // Remove old listener by cloning
   const newBtn = favoriteBtn.cloneNode(true);
   favoriteBtn.parentNode.replaceChild(newBtn, favoriteBtn);
 
+  // Add new listener
   newBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     toggleFavorite(pokemonId);
