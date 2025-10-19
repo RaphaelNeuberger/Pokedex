@@ -749,6 +749,78 @@ body.no-scroll {
   cursor: not-allowed;
 }
 
+/* ===== NAVIGATION ARROWS ===== */
+.nav-arrow {
+  position: fixed; /* Changed from absolute to fixed */
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  z-index: 1002; /* Higher than overlay */
+  color: #333;
+}
+
+.nav-arrow-left {
+  left: 20px; /* Changed from -60px */
+}
+
+.nav-arrow-right {
+  right: 20px; /* Changed from -60px */
+}
+
+.nav-arrow:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: var(--type-color, #667eea);
+  color: white;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Favorite button states */
+.favorite-button.favorited {
+  background: rgba(255, 0, 0, 0.8) !important;
+}
+
+.favorite-button.favorited svg {
+  fill: white;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS FOR ARROWS ===== */
+@media (max-width: 768px) {
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    bottom: 20px;
+    top: auto;
+    transform: none;
+  }
+
+  .nav-arrow-left {
+    left: 10px;
+  }
+
+  .nav-arrow-right {
+    right: 10px;
+  }
+
+  .nav-arrow:hover:not(:disabled) {
+    transform: scale(1.1);
+  }
+}
+
 /* ===== RESPONSIVE DESIGN (Mobile First) ===== */
 
 /* Tablets and up */

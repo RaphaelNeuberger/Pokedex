@@ -4,6 +4,7 @@ let currentOffset = 0;
 const LIMIT = 20;
 let allLoadedPokemon = [];
 let currentDetailIndex = 0;
+let favoritePokemon = [];
 
 // ===== DOM ELEMENTS =====
 const pokemonContainer = document.getElementById("pokemonContainer");
@@ -16,12 +17,13 @@ const overlayBackground = document.getElementById("overlayBackground");
 const closeButton = document.getElementById("closeButton");
 const prevButton = document.getElementById("prevButton");
 const nextButton = document.getElementById("nextButton");
-const detailContent = document.getElementById("pokemonDetailContent");
 
 // ===== INITIALIZATION =====
 function init() {
+  loadFavoritesFromStorage();
   loadPokemon();
   attachEventListeners();
+  initializeTabs();
 }
 
 function attachEventListeners() {
@@ -32,6 +34,46 @@ function attachEventListeners() {
   overlayBackground.addEventListener("click", closeOverlay);
   prevButton.addEventListener("click", showPreviousPokemon);
   nextButton.addEventListener("click", showNextPokemon);
+}
+
+// ===== LOCAL STORAGE FAVORITES =====
+function loadFavoritesFromStorage() {
+  const stored = localStorage.getItem("favoritePokemon");
+  if (stored) {
+    favoritePokemon = JSON.parse(stored);
+  }
+}
+
+function saveFavoritesToStorage() {
+  localStorage.setItem("favoritePokemon", JSON.stringify(favoritePokemon));
+}
+
+function toggleFavorite(pokemonId) {
+  const index = favoritePokemon.indexOf(pokemonId);
+
+  if (index > -1) {
+    favoritePokemon.splice(index, 1);
+  } else {
+    favoritePokemon.push(pokemonId);
+  }
+
+  saveFavoritesToStorage();
+  updateFavoriteButton(pokemonId);
+}
+
+function isFavorite(pokemonId) {
+  return favoritePokemon.includes(pokemonId);
+}
+
+function updateFavoriteButton(pokemonId) {
+  const favoriteBtn = document.getElementById("favoriteButton");
+  if (favoriteBtn) {
+    if (isFavorite(pokemonId)) {
+      favoriteBtn.classList.add("favorited");
+    } else {
+      favoriteBtn.classList.remove("favorited");
+    }
+  }
 }
 
 // ===== FETCH POKEMON DATA =====
@@ -88,16 +130,18 @@ function createPokemonCardElement(pokemon) {
 }
 
 function getPokemonCardHTML(pokemon) {
+  const heartIcon = isFavorite(pokemon.id) ? "❤️" : "🤍";
+
   return `
-        <div class="pokemon-id">#${formatPokemonId(pokemon.id)}</div>
-        <img src="${pokemon.sprites.other["official-artwork"].front_default}" 
-             alt="${pokemon.name}" 
-             class="pokemon-image">
-        <h2 class="pokemon-name">${pokemon.name}</h2>
-        <div class="pokemon-types">
-            ${getTypeBadgesHTML(pokemon.types)}
-        </div>
-    `;
+    <div class="pokemon-id">#${formatPokemonId(pokemon.id)}</div>
+    <img src="${pokemon.sprites.other["official-artwork"].front_default}" 
+         alt="${pokemon.name}" 
+         class="pokemon-image">
+    <h2 class="pokemon-name">${pokemon.name}</h2>
+    <div class="pokemon-types">
+      ${getTypeBadgesHTML(pokemon.types)}
+    </div>
+  `;
 }
 
 function getTypeBadgesHTML(types) {
@@ -105,7 +149,7 @@ function getTypeBadgesHTML(types) {
     .map(
       (typeInfo) =>
         `<span class="type-badge type-${typeInfo.type.name}">
-            ${typeInfo.type.name}
+          ${typeInfo.type.name}
         </span>`
     )
     .join("");
@@ -117,65 +161,64 @@ function openPokemonDetail(index) {
   const pokemon = allLoadedPokemon[index];
   displayPokemonDetail(pokemon);
   showOverlay();
+  updateNavigationButtons();
 }
 
 function displayPokemonDetail(pokemon) {
-  detailContent.innerHTML = getPokemonDetailHTML(pokemon);
+  const typeColor = getTypeColor(pokemon.types[0].type.name);
+  const typeColorLight = lightenColor(typeColor, 20);
+
+  document.documentElement.style.setProperty("--type-color", typeColor);
+  document.documentElement.style.setProperty(
+    "--type-color-light",
+    typeColorLight
+  );
+
+  const detailHeader = document.querySelector(".detail-header");
+  detailHeader.style.background = `linear-gradient(180deg, ${typeColor} 0%, ${typeColorLight} 100%)`;
+
+  document.getElementById("detailPokemonImage").src =
+    pokemon.sprites.other["official-artwork"].front_default;
+  document.getElementById("detailPokemonImage").alt = pokemon.name;
+  document.getElementById("detailPokemonName").textContent = pokemon.name;
+  document.getElementById("detailPokemonId").textContent = `#${formatPokemonId(
+    pokemon.id
+  )}`;
+  document.getElementById("detailPokemonTypes").innerHTML = getTypeBadgesHTML(
+    pokemon.types
+  );
+
+  updateFavoriteButton(pokemon.id);
+  attachFavoriteListener(pokemon.id);
+
+  fillAboutTab(pokemon);
+  fillStatsTab(pokemon);
+  fillEvolutionTab(pokemon);
+  fillMovesTab(pokemon);
 }
 
-function getPokemonDetailHTML(pokemon) {
-  return `
-        <div class="detail-header" 
-             style="background: ${getTypeColor(pokemon.types[0].type.name)}20;">
-            <img src="${
-              pokemon.sprites.other["official-artwork"].front_default
-            }" 
-                 alt="${pokemon.name}" 
-                 class="detail-image">
-            <h2 class="detail-name">${pokemon.name}</h2>
-            <div class="pokemon-types">
-                ${getTypeBadgesHTML(pokemon.types)}
-            </div>
-            <p class="pokemon-id">#${formatPokemonId(pokemon.id)}</p>
-        </div>
-        <div class="detail-stats">
-            <h3>Base Stats</h3>
-            ${getStatsHTML(pokemon.stats)}
-        </div>
-        <div class="detail-info">
-            <div class="stat-row">
-                <span class="stat-name">Height</span>
-                <span class="stat-value">${pokemon.height / 10} m</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-name">Weight</span>
-                <span class="stat-value">${pokemon.weight / 10} kg</span>
-            </div>
-        </div>
-    `;
+function attachFavoriteListener(pokemonId) {
+  const favoriteBtn = document.getElementById("favoriteButton");
+
+  const newBtn = favoriteBtn.cloneNode(true);
+  favoriteBtn.parentNode.replaceChild(newBtn, favoriteBtn);
+
+  newBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleFavorite(pokemonId);
+  });
 }
 
-function getStatsHTML(stats) {
-  return stats
-    .map(
-      (stat) => `
-        <div class="stat-row">
-            <span class="stat-name">${formatStatName(stat.stat.name)}</span>
-            <span class="stat-value">${stat.base_stat}</span>
-        </div>
-    `
-    )
-    .join("");
-}
-
-function formatStatName(statName) {
-  return statName.replace("-", " ");
+function updateNavigationButtons() {
+  prevButton.disabled = currentDetailIndex === 0;
+  nextButton.disabled = currentDetailIndex === allLoadedPokemon.length - 1;
 }
 
 function showPreviousPokemon() {
   if (currentDetailIndex > 0) {
     currentDetailIndex--;
     displayPokemonDetail(allLoadedPokemon[currentDetailIndex]);
+    updateNavigationButtons();
   }
 }
 
@@ -183,7 +226,105 @@ function showNextPokemon() {
   if (currentDetailIndex < allLoadedPokemon.length - 1) {
     currentDetailIndex++;
     displayPokemonDetail(allLoadedPokemon[currentDetailIndex]);
+    updateNavigationButtons();
   }
+}
+
+// ===== TAB FUNCTIONALITY =====
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll(".tab-button");
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      switchTab(button.dataset.tab);
+    });
+  });
+}
+
+function switchTab(tabName) {
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach((btn) => btn.classList.remove("active"));
+  tabContents.forEach((content) => content.classList.remove("active"));
+
+  const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+  const activeContent = document.getElementById(`${tabName}-tab`);
+
+  if (activeButton && activeContent) {
+    activeButton.classList.add("active");
+    activeContent.classList.add("active");
+  }
+}
+
+// ===== FILL TAB CONTENT =====
+function fillAboutTab(pokemon) {
+  document.getElementById("species").textContent = pokemon.name;
+  document.getElementById("height").textContent = `${(
+    pokemon.height / 10
+  ).toFixed(1)} m`;
+  document.getElementById("weight").textContent = `${(
+    pokemon.weight / 10
+  ).toFixed(1)} kg`;
+
+  const abilities = pokemon.abilities.map((a) => a.ability.name).join(", ");
+  document.getElementById("abilities").textContent = abilities;
+
+  document.getElementById("eggGroups").textContent = "Monster, Grass";
+  document.getElementById("eggCycle").textContent = "Grass";
+}
+
+function fillStatsTab(pokemon) {
+  const statsContainer = document.getElementById("statsContainer");
+  const maxStat = 255;
+
+  statsContainer.innerHTML = pokemon.stats
+    .map((stat) => {
+      const percentage = (stat.base_stat / maxStat) * 100;
+      const statColor = getStatColor(stat.base_stat);
+
+      return `
+        <div class="stat-row">
+          <span class="stat-name">${formatStatName(stat.stat.name)}</span>
+          <span class="stat-value">${stat.base_stat}</span>
+          <div class="stat-bar-container">
+            <div class="stat-bar" style="width: ${percentage}%; background: ${statColor};"></div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  document.getElementById("defensesPokemonName").textContent = pokemon.name;
+
+  const typeEffectivenessGrid = document.getElementById(
+    "typeEffectivenessGrid"
+  );
+  typeEffectivenessGrid.innerHTML = generateTypeEffectiveness(pokemon.types);
+}
+
+function fillEvolutionTab(pokemon) {
+  const evolutionChain = document.getElementById("evolutionChain");
+  evolutionChain.innerHTML =
+    '<p class="info-message">Evolution chain feature coming soon!</p>';
+}
+
+function fillMovesTab(pokemon) {
+  const movesList = document.getElementById("movesList");
+  const moves = pokemon.moves.slice(0, 10);
+
+  movesList.innerHTML = moves
+    .map((move) => {
+      return `
+        <div class="move-item">
+          <span class="move-name">${move.move.name}</span>
+          <span class="move-type" style="background: ${getTypeColor(
+            "normal"
+          )}">Normal</span>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 // ===== SEARCH FUNCTIONALITY =====
@@ -254,6 +395,10 @@ function formatPokemonId(id) {
   return String(id).padStart(3, "0");
 }
 
+function formatStatName(statName) {
+  return statName.replace("-", " ");
+}
+
 function getTypeColor(type) {
   const typeColors = {
     normal: "#A8A77A",
@@ -276,140 +421,6 @@ function getTypeColor(type) {
     fairy: "#D685AD",
   };
   return typeColors[type] || "#A8A77A";
-}
-
-function showError() {
-  alert("Error loading Pokémon. Please try again.");
-}
-
-// ===== START APPLICATION =====
-init();
-
-// ===== TAB FUNCTIONALITY =====
-function initializeTabs() {
-  const tabButtons = document.querySelectorAll(".tab-button");
-
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      switchTab(button.dataset.tab);
-    });
-  });
-}
-
-function switchTab(tabName) {
-  const tabButtons = document.querySelectorAll(".tab-button");
-  const tabContents = document.querySelectorAll(".tab-content");
-
-  tabButtons.forEach((btn) => btn.classList.remove("active"));
-  tabContents.forEach((content) => content.classList.remove("active"));
-
-  const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
-  const activeContent = document.getElementById(`${tabName}-tab`);
-
-  if (activeButton && activeContent) {
-    activeButton.classList.add("active");
-    activeContent.classList.add("active");
-  }
-}
-
-// ===== ENHANCED POKEMON DETAIL DISPLAY =====
-function displayPokemonDetail(pokemon) {
-  const typeColor = getTypeColor(pokemon.types[0].type.name);
-  const typeColorLight = lightenColor(typeColor, 20);
-
-  document.documentElement.style.setProperty("--type-color", typeColor);
-  document.documentElement.style.setProperty(
-    "--type-color-light",
-    typeColorLight
-  );
-
-  const detailHeader = document.querySelector(".detail-header");
-  detailHeader.style.background = `linear-gradient(180deg, ${typeColor} 0%, ${typeColorLight} 100%)`;
-
-  document.getElementById("detailPokemonImage").src =
-    pokemon.sprites.other["official-artwork"].front_default;
-  document.getElementById("detailPokemonImage").alt = pokemon.name;
-  document.getElementById("detailPokemonName").textContent = pokemon.name;
-  document.getElementById("detailPokemonId").textContent = `#${formatPokemonId(
-    pokemon.id
-  )}`;
-  document.getElementById("detailPokemonTypes").innerHTML = getTypeBadgesHTML(
-    pokemon.types
-  );
-
-  fillAboutTab(pokemon);
-  fillStatsTab(pokemon);
-  fillEvolutionTab(pokemon);
-  fillMovesTab(pokemon);
-}
-
-function fillAboutTab(pokemon) {
-  document.getElementById("species").textContent = pokemon.name;
-  document.getElementById("height").textContent = `${(
-    pokemon.height / 10
-  ).toFixed(1)} m`;
-  document.getElementById("weight").textContent = `${(
-    pokemon.weight / 10
-  ).toFixed(1)} kg`;
-
-  const abilities = pokemon.abilities.map((a) => a.ability.name).join(", ");
-  document.getElementById("abilities").textContent = abilities;
-
-  document.getElementById("eggGroups").textContent = "Monster, Grass";
-  document.getElementById("eggCycle").textContent = "Grass";
-}
-
-function fillStatsTab(pokemon) {
-  const statsContainer = document.getElementById("statsContainer");
-  const maxStat = 255;
-
-  statsContainer.innerHTML = pokemon.stats
-    .map((stat) => {
-      const percentage = (stat.base_stat / maxStat) * 100;
-      const statColor = getStatColor(stat.base_stat);
-
-      return `
-            <div class="stat-row">
-                <span class="stat-name">${formatStatName(stat.stat.name)}</span>
-                <span class="stat-value">${stat.base_stat}</span>
-                <div class="stat-bar-container">
-                    <div class="stat-bar" style="width: ${percentage}%; background: ${statColor};"></div>
-                </div>
-            </div>
-        `;
-    })
-    .join("");
-
-  document.getElementById("defensesPokemonName").textContent = pokemon.name;
-
-  const typeEffectivenessGrid = document.getElementById(
-    "typeEffectivenessGrid"
-  );
-  typeEffectivenessGrid.innerHTML = generateTypeEffectiveness(pokemon.types);
-}
-
-function fillEvolutionTab(pokemon) {
-  const evolutionChain = document.getElementById("evolutionChain");
-  evolutionChain.innerHTML =
-    '<p class="info-message">Evolution chain feature coming soon!</p>';
-}
-
-function fillMovesTab(pokemon) {
-  const movesList = document.getElementById("movesList");
-  const moves = pokemon.moves.slice(0, 10);
-
-  movesList.innerHTML = moves
-    .map((move) => {
-      return `
-            <div class="move-item">
-                <span class="move-name">${move.move.name}</span>
-                <span class="move-type" style="background: ${getTypeColor(
-                  "normal"
-                )}">Normal</span>
-            </div>
-        `;
-    })
-    .join("");
 }
 
 function getStatColor(value) {
@@ -435,11 +446,11 @@ function generateTypeEffectiveness(types) {
     .map((type) => {
       const multiplier = "1×";
       return `
-            <div class="effectiveness-item">
-                <div class="effectiveness-icon type-${type}">${type[0].toUpperCase()}</div>
-                <span class="effectiveness-multiplier">${multiplier}</span>
-            </div>
-        `;
+        <div class="effectiveness-item">
+          <div class="effectiveness-icon type-${type}">${type[0].toUpperCase()}</div>
+          <span class="effectiveness-multiplier">${multiplier}</span>
+        </div>
+      `;
     })
     .join("");
 }
@@ -463,9 +474,9 @@ function lightenColor(color, percent) {
   );
 }
 
-// ===== UPDATE INITIALIZATION =====
-function init() {
-  loadPokemon();
-  attachEventListeners();
-  initializeTabs(); // NEU!
+function showError() {
+  alert("Error loading Pokémon. Please try again.");
 }
+
+// ===== START APPLICATION =====
+init();
