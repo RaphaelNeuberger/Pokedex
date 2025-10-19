@@ -49,10 +49,151 @@
     <div id="pokemonOverlay" class="overlay hidden">
       <div class="overlay-background" id="overlayBackground"></div>
       <div class="pokemon-detail-card" id="pokemonDetailCard">
-        <button class="close-button" id="closeButton">&times;</button>
-        <button class="nav-button nav-prev" id="prevButton">&larr;</button>
-        <button class="nav-button nav-next" id="nextButton">&rarr;</button>
-        <div id="pokemonDetailContent"></div>
+        <!-- Header with gradient background -->
+        <div class="detail-header" id="detailHeader">
+          <button class="back-button" id="closeButton">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button class="favorite-button" id="favoriteButton">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+
+          <div class="detail-pokemon-image-container">
+            <img
+              id="detailPokemonImage"
+              src=""
+              alt=""
+              class="detail-pokemon-image" />
+          </div>
+
+          <div class="detail-pokemon-info">
+            <h2 class="detail-pokemon-name" id="detailPokemonName"></h2>
+            <div class="detail-pokemon-types" id="detailPokemonTypes"></div>
+            <p class="detail-pokemon-id" id="detailPokemonId"></p>
+          </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+          <button class="tab-button active" data-tab="about">About</button>
+          <button class="tab-button" data-tab="stats">Base Stats</button>
+          <button class="tab-button" data-tab="evolution">Evolution</button>
+          <button class="tab-button" data-tab="moves">Moves</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content-container">
+          <!-- About Tab -->
+          <div class="tab-content active" id="about-tab">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Species</span>
+                <span class="info-value" id="species"></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Height</span>
+                <span class="info-value" id="height"></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Weight</span>
+                <span class="info-value" id="weight"></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Abilities</span>
+                <span class="info-value" id="abilities"></span>
+              </div>
+            </div>
+
+            <div class="breeding-section">
+              <h3 class="section-title">Breeding</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Gender</span>
+                  <span class="info-value" id="gender">♂ 87.5% ♀ 12.5%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Egg Groups</span>
+                  <span class="info-value" id="eggGroups"></span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Egg Cycle</span>
+                  <span class="info-value" id="eggCycle"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Base Stats Tab -->
+          <div class="tab-content" id="stats-tab">
+            <div class="stats-container" id="statsContainer"></div>
+
+            <div class="type-defenses">
+              <h3 class="section-title">Type Defenses</h3>
+              <p class="type-defenses-subtitle">
+                The effectiveness of each type on
+                <span id="defensesPokemonName"></span>
+              </p>
+              <div
+                class="type-effectiveness-grid"
+                id="typeEffectivenessGrid"></div>
+            </div>
+          </div>
+
+          <!-- Evolution Tab -->
+          <div class="tab-content" id="evolution-tab">
+            <div class="evolution-chain" id="evolutionChain">
+              <p class="info-message">Evolution chain loading...</p>
+            </div>
+          </div>
+
+          <!-- Moves Tab -->
+          <div class="tab-content" id="moves-tab">
+            <div class="moves-list" id="movesList">
+              <p class="info-message">Moves loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-arrow-left" id="prevButton">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button class="nav-arrow nav-arrow-right" id="nextButton">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
       </div>
     </div>
 
