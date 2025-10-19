@@ -347,13 +347,13 @@ body.no-scroll {
 
 .nav-prev {
   left: 1rem;
-  top: 50%;
+  top: 25%;
   transform: translateY(-50%);
 }
 
 .nav-next {
   right: 1rem;
-  top: 50%;
+  top: 25%;
   transform: translateY(-50%);
 }
 
